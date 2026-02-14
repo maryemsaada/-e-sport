@@ -31,6 +31,12 @@
         margin-bottom: 0.5rem;
         display: block;
     }
+    .admin-form .form-error-message,
+    .admin-form .invalid-feedback,
+    .admin-form ul,
+    .admin-form li {
+        color: #ffffff !important;
+    }
 
     .form-grid {
         display: grid;
@@ -73,6 +79,8 @@
         color: #e2e8f0;
     }
 </style>
+
+
 
 {{ form_start(form, {'attr': {'class': 'admin-form', 'novalidate': 'novalidate'}}) }}
 
