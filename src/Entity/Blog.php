@@ -7,7 +7,9 @@ use Doctrine\Common\Collections\ArrayCollection; // ⚡ Added
 use Doctrine\Common\Collections\Collection;     // ⚡ Added
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Comment;                           // ⚡ Added
+use App\Entity\Comment;  
+use Symfony\Component\Validator\Constraints as Assert;
+                         // ⚡ Added
 
 #[ORM\Entity(repositoryClass: BlogRepository::class)]
 class Blog
@@ -17,14 +19,33 @@ class Blog
     #[ORM\Column]
     private ?int $id = null;
 
+#[Assert\NotBlank(message: "Le titre est obligatoire")]
+#[Assert\Length(
+    min: 3,
+    max: 255,
+    minMessage: "Le titre doit contenir au moins {{ limit }} caractères",
+    maxMessage: "Le titre ne peut pas dépasser {{ limit }} caractères"
+)]
     #[ORM\Column(length: 255)]
     private ?string $title = null;
+    #[Assert\NotBlank(message: "Le contenu (URL de l'image) est obligatoire")]
+#[Assert\Length(
+    min: 10,
+    minMessage: "L'URL doit contenir au moins {{ limit }} caractères"
+)]
+#[Assert\Url(message: "Le contenu doit être une URL valide")]
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+    #[Assert\Length(
+    min: 3,
+    max: 255,
+    minMessage: "La catégorie doit contenir au moins {{ limit }} caractères",
+    maxMessage: "La catégorie ne peut pas dépasser {{ limit }} caractères"
+)]
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $category = null;

@@ -15,6 +15,28 @@ class BlogRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Blog::class);
     }
+public function searchByTitleAndDate(?string $title, ?string $date)
+{
+    $qb = $this->createQueryBuilder('b');
+
+    if ($title) {
+        $qb->andWhere('b.title LIKE :title')
+           ->setParameter('title', '%' . $title . '%');
+    }
+
+    if ($date) {
+        $start = new \DateTimeImmutable($date . ' 00:00:00');
+        $end = new \DateTimeImmutable($date . ' 23:59:59');
+
+        $qb->andWhere('b.createdAt BETWEEN :start AND :end')
+           ->setParameter('start', $start)
+           ->setParameter('end', $end);
+    }
+
+    $qb->orderBy('b.createdAt', 'DESC');
+
+    return $qb->getQuery()->getResult();
+}
 
     //    /**
     //     * @return Blog[] Returns an array of Blog objects

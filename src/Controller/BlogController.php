@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
 #[Route('/blog')]
 final class BlogController extends AbstractController
 {
@@ -23,14 +24,19 @@ final class BlogController extends AbstractController
         ]);
     }
 
-    #[Route('/blogs', name: 'app_blog_user_index', methods: ['GET'])]
-    public function indexUser(BlogRepository $blogRepository): Response
-    {
-        $blogs = $blogRepository->findAll();
-        return $this->render('blog/indexuser.html.twig', [
-            'blogs' => $blogs,
-        ]);
-    }
+#[Route('/blogs', name: 'app_blog_user_index', methods: ['GET'])]
+public function indexUser(Request $request, BlogRepository $blogRepository): Response
+{
+    $title = $request->query->get('title');
+    $date = $request->query->get('date');
+
+    $blogs = $blogRepository->searchByTitleAndDate($title, $date);
+
+    return $this->render('blog/indexuser.html.twig', [
+        'blogs' => $blogs,
+    ]);
+}
+
 
     #[Route('/new', name: 'app_blog_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response

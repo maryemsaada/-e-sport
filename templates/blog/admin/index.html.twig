@@ -184,8 +184,8 @@
                         <th>Content</th>
                         <th>CreatedAt</th>
                         <th>Category</th>
-                        <th>ImageName</th>
-                        <th>CommentCount</th>
+                        
+                     
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -196,8 +196,7 @@
                         <td>{{ blog.content|slice(0,50) ~ (blog.content|length>50 ? '...' : '') }}</td>
                         <td>{{ blog.createdAt ? blog.createdAt|date('Y-m-d H:i:s') : '' }}</td>
                         <td>{{ blog.category }}</td>
-                        <td>{{ blog.imageName }}</td>
-                        <td>{{ blog.commentCount }}</td>
+                       
                         <td class="text-end">
                             <div class="d-flex gap-2 justify-content-end">
                                 <a href="{{ path('admin_blog_show', {'id': blog.id}) }}" class="action-btn view" title="View"><i class="fas fa-eye"></i></a>
