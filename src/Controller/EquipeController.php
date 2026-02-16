@@ -205,8 +205,12 @@ final class EquipeController extends AbstractController
                 $user = $entityManager->getRepository(User::class)->find($userId);
     
                 if ($user && !in_array($user->getId(), $teamUsers)) {
-                    $equipe->addMember($user);
-                    $entityManager->flush();
+                    if ($equipe->getMembers()->count() < $equipe->getMaxMembers()) {
+                        $equipe->addMember($user);
+                        $entityManager->flush();
+                    } else {
+                        $this->addFlash('error', 'Impossible d\'ajouter : l\'équipe est pleine.');
+                    }
                 }
             }
     

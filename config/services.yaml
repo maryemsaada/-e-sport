@@ -1,3 +1,6 @@
+parameters:
+    teams_directory: '%kernel.project_dir%/public/uploads/teams'
+
 services:
     # default configuration
     _defaults:

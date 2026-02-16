@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 class Equipe
@@ -15,21 +16,27 @@ class Equipe
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
-    private string $nom;
+    #[Assert\NotBlank(message: "Le nom de l'équipe ne peut pas être vide.")]
+    #[Assert\Length(max: 100, maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères.")]
+    private ?string $nom = null;
 
     #[ORM\ManyToMany(targetEntity: User::class)]
+    #[Assert\Count(max: 5, maxMessage: "Une équipe ne peut pas avoir plus de {{ limit }} membres.")]
     private Collection $members;
 
     #[ORM\ManyToMany(targetEntity: Tournoi::class, inversedBy: 'equipes')]
     private Collection $Tournois;
     #[ORM\Column(type: 'integer')]
+    #[Assert\Range(min: 1, max: 100, notInRangeMessage: "Le nombre maximum de membres doit être entre {{ min }} et {{ max }}.")]
     private int $maxMembers = 5;
 
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "Une équipe doit avoir un propriétaire.")]
     private ?User $owner = null;
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: "Le logo doit être une URL valide.")]
     private ?string $logo = null;
 
     public function __construct()
@@ -81,12 +88,15 @@ public function setNom(string $nom): self
 
     public function addMember(User $user): self
 {
-    if (
-        !$this->members->contains($user)
-        && $this->members->count() < $this->maxMembers
-    ) {
-        $this->members->add($user);
+    if ($this->members->contains($user)) {
+        return $this;
     }
+
+    if ($this->members->count() >= $this->maxMembers) {
+        throw new \DomainException('Impossible d\'ajouter : l\'équipe est pleine.');
+    }
+
+    $this->members->add($user);
 
     return $this;
 }
