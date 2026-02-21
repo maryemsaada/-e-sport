@@ -64,7 +64,11 @@ class GoogleOAuthAuthenticator extends AbstractAuthenticator implements Authenti
             $resourceOwner = $this->googleProvider->getResourceOwner($accessToken);
             $googleUser = $resourceOwner->toArray();
 
-            $googleId = $googleUser['id'];
+            // Google uses 'sub' for the unique ID, fallback to 'id'
+            $googleId = $googleUser['sub'] ?? $googleUser['id'] ?? null;
+            if (!$googleId) {
+                throw new \Exception('Unable to retrieve Google user ID from OAuth response');
+            }
             $email = $googleUser['email'];
             $name = $googleUser['name'] ?? $googleUser['given_name'] ?? 'User';
 
@@ -79,6 +83,7 @@ class GoogleOAuthAuthenticator extends AbstractAuthenticator implements Authenti
                     // Link existing user to Google account
                     $user->setGoogleOAuthId($googleId);
                     $user->setOauthProvider('google');
+                    $user->setIsActive(true);
                 } else {
                     // Create new user
                     $user = new User();
@@ -86,6 +91,8 @@ class GoogleOAuthAuthenticator extends AbstractAuthenticator implements Authenti
                     $user->setNom($name);
                     $user->setGoogleOAuthId($googleId);
                     $user->setOauthProvider('google');
+                    $user->setIsActive(true);
+                    $user->setRoles(['ROLE_USER']);
                     // Set a random password for OAuth users
                     $user->setPassword(bin2hex(random_bytes(16)));
                 }
