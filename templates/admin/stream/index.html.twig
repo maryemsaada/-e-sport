@@ -1,3 +1,4 @@
+{# templates/admin/stream/index.html.twig #}
 {% extends 'admin/dashboard.html.twig' %}
 
 {% block title %}Live Streaming{% endblock %}
@@ -6,20 +7,53 @@
 
 <div class="page-header">
     <h1 class="page-title"><i class="fas fa-video me-2"></i> Live Stream</h1>
-    <p class="page-subtitle">Diffusion du flux OBS en direct</p>
+    <p class="page-subtitle">Diffusion du flux OBS en direct et gestion de la vidéo</p>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <video id="video" controls autoplay width="100%" class="rounded"></video>
+<div class="row">
+    {# Colonne lecteur vidéo #}
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5>Flux Live OBS</h5>
+                <video id="video" controls autoplay width="100%" class="rounded"></video>
+            </div>
+        </div>
+
+        {# Si tu veux aussi montrer la dernière vidéo uploadée #}
+        {% if stream.url %}
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5>Dernière vidéo uploadée</h5>
+                    <video controls width="100%" class="rounded">
+                        <source src="{{ asset('uploads/videos/' ~ stream.url) }}" type="video/mp4">
+                        Votre navigateur ne supporte pas la lecture de vidéo.
+                    </video>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    {# Colonne formulaire upload vidéo #}
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Uploader une nouvelle vidéo</h5>
+                {{ form_start(form, {'attr': {'enctype':'multipart/form-data'}}) }}
+                    {{ form_row(form.videoFile) }}
+                    <button class="btn btn-primary mt-2">Mettre à jour la vidéo</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
     </div>
 </div>
 
+{# Script HLS.js pour le flux live #}
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var video = document.getElementById('video');
-    var videoSrc = "{{ streamUrl }}";
+    var videoSrc = "{{ streamUrl }}"; // flux OBS/Nginx
 
     if (Hls.isSupported()) {
         var hls = new Hls();

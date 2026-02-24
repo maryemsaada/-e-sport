@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Live Stream{% endblock %}
+
+{% block body %}
+<div class="container my-4" style="padding-top:120px;"> {# padding top pour navbar #}
+    <div class="row g-3">
+
+        <!-- ===== VIDEO STREAM ===== -->
+        <div class="col-lg-8">
+            <div class="position-relative shadow rounded overflow-hidden" style="background:#000;">
+                <span class="position-absolute top-0 start-0 m-2 px-2 py-1 bg-danger text-white fw-bold rounded animate__animated animate__pulse animate__infinite z-2">
+                    LIVE
+                </span>
+                <video id="live-video" controls autoplay class="w-100" style="aspect-ratio:16/9; display:block;"></video>
+
+                <!-- Reactions flottantes -->
+                <div id="floating-reactions" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events:none;"></div>
+            </div>
+        </div>
+
+        <!-- ===== COMMENTAIRES ET REACTIONS ===== -->
+        <div class="col-lg-4 d-flex flex-column">
+            <div class="card bg-dark bg-opacity-75 text-white shadow rounded p-3 d-flex flex-column flex-grow-1" style="max-height:500px;">
+                <h5 class="fw-bold text-danger mb-3 text-center">Interagir</h5>
+                <div id="comments-list" class="flex-grow-1 mb-3 overflow-auto p-2 rounded" style="background:rgba(255,255,255,0.05);"></div>
+                <div class="d-flex gap-2 mt-auto">
+                    <input type="text" id="commentInput" class="form-control bg-secondary text-white" placeholder="Écris ton commentaire...">
+                    <button id="sendComment" class="btn btn-danger">Envoyer</button>
+                </div>
+                <div class="d-flex gap-2 mt-3 justify-content-center">
+                    <button class="btn btn-outline-light react-btn" data-type="love">❤️</button>
+                    <button class="btn btn-outline-light react-btn" data-type="like">👍</button>
+                    <button class="btn btn-outline-light react-btn" data-type="bravo">👏</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% if stream %}
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const video = document.getElementById('live-video');
+    const videoSrc = "{{ stream.url }}";
+    const commentsList = document.getElementById('comments-list');
+    const commentInput = document.getElementById('commentInput');
+    const floatingReactions = document.getElementById('floating-reactions');
+
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+        video.addEventListener('loadedmetadata', () => video.play());
+    }
+
+    function addCommentToDOM(data) {
+        const div = document.createElement('div');
+        div.className = "bg-secondary bg-opacity-25 p-2 rounded mb-2";
+        div.innerHTML = `<strong>${data.username}</strong>: ${data.comment || ''} ${data.type && data.type !== 'comment' ? '('+data.type+')' : ''}`;
+        commentsList.appendChild(div);
+        commentsList.scrollTop = commentsList.scrollHeight;
+
+        if(data.type && data.type !== 'comment') {
+            const emoji = document.createElement('div');
+            emoji.textContent = data.type === 'love' ? '❤️' : data.type === 'like' ? '👍' : '👏';
+            emoji.style.position = 'absolute';
+            emoji.style.left = Math.random() * 80 + '%';
+            emoji.style.top = '80%';
+            emoji.style.fontSize = '2rem';
+            emoji.style.opacity = 1;
+            emoji.style.transition = 'all 2s ease-out';
+            floatingReactions.appendChild(emoji);
+            setTimeout(() => { emoji.style.top = '20%'; emoji.style.opacity = 0; }, 50);
+            setTimeout(() => floatingReactions.removeChild(emoji), 2000);
+        }
+    }
+
+    document.getElementById('sendComment').addEventListener('click', () => {
+        const comment = commentInput.value.trim();
+        if(!comment) return;
+        fetch("{{ path('stream_interact', {id: stream.id}) }}", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ type: 'comment', comment })
+        })
+        .then(res => res.json())
+        .then(data => { addCommentToDOM(data); commentInput.value = ''; })
+        .catch(err => console.error(err));
+    });
+
+    document.querySelectorAll('.react-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            fetch("{{ path('stream_interact', {id: stream.id}) }}", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ type })
+            })
+            .then(res => res.json())
+            .then(data => addCommentToDOM(data))
+            .catch(err => console.error(err));
+        });
+    });
+});
+</script>
+{% endif %}
+
+<style>
+body { background-color: #121212; color: #fff; }
+video { border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.7); }
+#comments-list::-webkit-scrollbar { width: 6px; }
+#comments-list::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.3); border-radius: 3px; }
+.react-btn { font-size: 1.5rem; transition: transform 0.2s; }
+.react-btn:hover { transform: scale(1.2); }
+.card { border: none; }
+</style>
+{% endblock %}
