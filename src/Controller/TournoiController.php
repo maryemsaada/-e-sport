@@ -134,7 +134,6 @@ final class TournoiController extends AbstractController
         } catch (\Throwable $e) {
             $this->addFlash('warning', 'Inscription enregistrée (problème secondaire : ' . $e->getMessage() . ')');
         }
-
         $this->addFlash('success', 'Paiement effectué ! Inscription au tournoi réussie.');
         return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
     }
@@ -209,7 +208,6 @@ final class TournoiController extends AbstractController
                 } catch (\Throwable $e) {
                     $this->addFlash('warning', 'Inscription enregistrée (problème secondaire : ' . $e->getMessage() . ')');
                 }
-
                 $this->addFlash('success', 'Inscription au tournoi effectuée avec succès !');
                 return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
             }
