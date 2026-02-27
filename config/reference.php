@@ -1582,6 +1582,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     organization?: scalar|Param|null, // Default: "%env(default::OPENAI_ORGANIZATION)%"
  *     project?: scalar|Param|null, // OpenAI API project // Default: null
  *     base_uri?: scalar|Param|null, // OpenAI API base URL used to make requests. Defaults to: api.openai.com/v1 // Default: null
+ * }
  * @psalm-type DoctrineDoctorConfig = array{
  *     enabled?: bool|Param, // Enable or disable Doctrine Doctor // Default: true
  *     analysis?: array{

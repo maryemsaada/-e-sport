@@ -38,8 +38,9 @@ class CartController extends AbstractController
         // Check if user is logged in
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $user = $this->getUser();
-        $cart = $this->cartService->getCart($user);
+        /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$cart = $this->cartService->getCart($user);
 
         return $this->render('cart/index.html.twig', [
             'cart' => $cart,
@@ -63,8 +64,9 @@ class CartController extends AbstractController
             ], 401);
         }
 
-        $user = $this->getUser();
-        $cart = $this->cartService->getCart($user);
+      /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$cart = $this->cartService->getCart($user);
 
         // Get quantity from request (default 1)
         $data = json_decode($request->getContent(), true);
@@ -200,8 +202,9 @@ class CartController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $user = $this->getUser();
-        $cart = $this->cartService->getCart($user);
+        /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$cart = $this->cartService->getCart($user);
 
         try {
             $this->cartService->clearCart($cart);
@@ -231,7 +234,9 @@ class CartController extends AbstractController
             ]);
         }
 
-        $cart = $this->cartService->getCart($this->getUser());
+        /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$cart = $this->cartService->getCart($user);
 
         return new JsonResponse([
             'totalItems' => $this->cartService->getTotalItems($cart),
