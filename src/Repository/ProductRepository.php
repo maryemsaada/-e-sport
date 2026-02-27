@@ -15,7 +15,22 @@ class ProductRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Product::class);
     }
+// src/Repository/ProductRepository.php
 
+public function findTopSales(int $limit = 3): array
+{
+    return $this->createQueryBuilder('p')
+        ->select('p', 'SUM(oi.quantity) as HIDDEN totalSold')
+        ->join('App\Entity\OrderItem', 'oi', 'WITH', 'oi.product = p')
+        ->join('oi.order', 'o')
+        ->where('o.status = :status')
+        ->setParameter('status', 'paid')
+        ->groupBy('p.id')
+        ->orderBy('totalSold', 'DESC')
+        ->setMaxResults($limit)
+        ->getQuery()
+        ->getResult();
+}
     //    /**
     //     * @return Product[] Returns an array of Product objects
     //     */
